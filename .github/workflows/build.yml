@@ -1,0 +1,56 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+# electron-builder needs write access to create the GitHub Release and upload assets
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+          - os: macos-latest
+            script: dist:mac
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npm run client:build
+      # Build the installer AND publish it to the GitHub Release for this tag.
+      # electron-builder uploads the installer + latest.yml / latest-mac.yml that
+      # electron-updater reads to detect and download updates. On tag pushes it
+      # publishes; on manual runs (no tag) it only builds.
+      - name: Build & publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            npm run ${{ matrix.script }} -- --publish always
+          else
+            npm run ${{ matrix.script }} -- --publish never
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iea-client-${{ matrix.os }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+          if-no-files-found: ignore

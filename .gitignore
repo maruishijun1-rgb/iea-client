@@ -1,0 +1,10 @@
+node_modules/
+release/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+
+# Java client build artifacts (regenerated in CI/dev with: npm run client:build)
+client/libs/
+client/build/

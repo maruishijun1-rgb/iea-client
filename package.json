@@ -1,0 +1,94 @@
+{
+  "name": "iea-client",
+  "productName": "IEA Client",
+  "version": "0.1.0",
+  "description": "A Minecraft 1.8.9 PvP client launcher (Lunar-style)",
+  "main": "src/main/index.js",
+  "author": "marui",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "icons": "node scripts/make-icons.js",
+    "client:build": "node client/build.mjs",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:all": "electron-builder -mw"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
+    "png2icons": "^2.0.1"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "electron-updater": "^6.8.9",
+    "msmc": "^5.0.5"
+  },
+  "build": {
+    "appId": "com.marui.ieaclient",
+    "productName": "IEA Client",
+    "compression": "maximum",
+    "removePackageScripts": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "maruishijun1-rgb",
+        "repo": "iea-client"
+      }
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "client/build/iea-agent.jar",
+        "to": "iea-agent.jar"
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.games",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "writeUpdateInfo": false
+    }
+  }
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
+  <title>IEA Client</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">IEA</div>
+        <div class="brand-text">
+          <div class="brand-name">IEA CLIENT</div>
+          <div class="brand-sub">PvP · Minecraft <span id="versionBadge">1.8.9</span></div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-tab="play"><span data-i18n="nav_play">Play</span></button>
+        <button class="nav-item" data-tab="account"><span data-i18n="nav_account">Account</span></button>
+        <button class="nav-item" data-tab="settings"><span data-i18n="nav_settings">Settings</span></button>
+        <button class="nav-item" data-tab="logs"><span data-i18n="nav_logs">Logs</span></button>
+      </nav>
+
+      <div class="account-card" id="accountCard">
+        <div class="avatar" id="avatar">P</div>
+        <div class="account-meta">
+          <div class="account-name" id="accountName">Not logged in</div>
+          <div class="account-type" id="accountType">—</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- PLAY -->
+      <section class="tab" data-tab="play">
+        <div class="hero">
+          <h1>Minecraft <span class="accent">1.8.9</span></h1>
+        </div>
+
+        <div class="launch-area">
+          <button id="launchBtn" class="launch-btn" data-i18n="btn_launch">LAUNCH</button>
+          <div class="status" id="status"></div>
+          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="progress-text" id="progressText"></div>
+        </div>
+      </section>
+
+      <!-- ACCOUNT -->
+      <section class="tab hidden" data-tab="account">
+        <h2 data-i18n="acc_title">Account</h2>
+        <div class="field">
+          <label data-i18n="acc_offline_label">Offline username</label>
+          <div class="row">
+            <input id="usernameInput" type="text" placeholder="Player" maxlength="16" />
+            <button id="offlineBtn" class="btn" data-i18n="acc_use_offline">Use Offline</button>
+          </div>
+          <p class="muted small" data-i18n="acc_offline_note">Offline mode works for singleplayer / LAN / offline servers only.</p>
+        </div>
+
+        <div class="field">
+          <label data-i18n="acc_ms_label">Microsoft account</label>
+          <div class="row">
+            <button id="msBtn" class="btn btn-primary" data-i18n="acc_ms_signin">Sign in with Microsoft</button>
+            <button id="logoutBtn" class="btn btn-ghost" data-i18n="acc_logout">Log out</button>
+          </div>
+          <div id="msPrompt" class="ms-prompt hidden"></div>
+          <p class="muted small" data-i18n="acc_ms_note">A Microsoft sign-in window will pop up — no setup needed.</p>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="tab hidden" data-tab="settings">
+        <h2 data-i18n="set_title">Settings</h2>
+
+        <div class="field">
+          <label data-i18n="set_lang_label">Language</label>
+          <div class="row">
+            <select id="langSelect">
+              <option value="ja">日本語</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="check-row">
+            <input id="injectClient" type="checkbox" />
+            <span data-i18n="set_inject_label">Enable IEA client (mods / clickGUI)</span>
+          </label>
+          <p class="muted small" data-i18n="set_inject_note">Injects the IEA agent. Open the in-game menu with Right Shift.</p>
+        </div>
+
+        <div class="field">
+          <label class="check-row">
+            <input id="capLog" type="checkbox" />
+            <span data-i18n="set_caplog_label">Limit the log console (saves memory)</span>
+          </label>
+          <p class="muted small" data-i18n="set_caplog_note">Keeps only the most recent lines. Turn off to keep the full log (uses more memory on long sessions).</p>
+        </div>
+
+        <div class="field">
+          <label data-i18n="set_hypixel_label">Hypixel API key (for LevelHead)</label>
+          <input id="hypixelKey" type="password" data-i18n-ph="set_hypixel_ph" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+          <p class="muted small" data-i18n="set_hypixel_note">Create one at developer.hypixel.net. Saved to iea-hypixel-key.txt on launch.</p>
+        </div>
+
+        <div class="field">
+          <label data-i18n="set_java_label">Java (Java 8 required for 1.8.9)</label>
+          <div class="row">
+            <input id="javaPath" type="text" data-i18n-ph="set_java_ph" placeholder="Leave empty to use 'java' from PATH" />
+            <button id="pickJavaBtn" class="btn" data-i18n="set_browse">Browse…</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label data-i18n="set_dir_label">Game directory</label>
+          <div class="row">
+            <input id="gameDir" type="text" data-i18n-ph="set_dir_ph" placeholder="Leave empty for the default location" />
+            <button id="pickDirBtn" class="btn" data-i18n="set_browse">Browse…</button>
+            <button id="openDirBtn" class="btn btn-ghost" data-i18n="set_open">Open</button>
+          </div>
+          <p class="muted small" data-i18n="set_dir_note">Where saves, options and screenshots are stored.</p>
+        </div>
+
+        <div class="field">
+          <label><span data-i18n="set_ram_label">Memory (Max RAM)</span>: <span id="ramValue">2048</span> MB</label>
+          <input id="ramSlider" type="range" min="1024" max="16384" step="512" value="2048" />
+        </div>
+
+        <button id="saveSettingsBtn" class="btn btn-primary" data-i18n="set_save">Save settings</button>
+        <span id="savedHint" class="muted small hidden" data-i18n="set_saved">Saved ✓</span>
+      </section>
+
+      <!-- LOGS -->
+      <section class="tab hidden" data-tab="logs">
+        <h2 data-i18n="logs_title">Game logs</h2>
+        <pre id="logConsole" class="log-console"></pre>
+        <button id="clearLogBtn" class="btn btn-ghost" data-i18n="logs_clear">Clear</button>
+      </section>
+    </main>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

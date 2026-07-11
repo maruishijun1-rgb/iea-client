@@ -1,6 +1,6 @@
 # IEA Client
 
-Lunar Client 風の Minecraft **1.8.9** 用 PvP ランチャー(Electron 製、Windows / macOS 両対応)。
+Minecraft **1.8.9** 用 PvP ランチャー(Electron 製、Windows / macOS 両対応)。
 
 > 現在のスコープ: **ランチャーのみ**。改造済みクライアント(独自MOD/インジェクション)は未実装で、
 > いまは公式の純正 1.8.9 をダウンロードして起動します。

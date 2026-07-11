@@ -215,25 +215,25 @@ export default function App() {
       <div className="w-full h-screen bg-[#0e0f14] flex flex-col overflow-hidden relative z-10">
 
         {/* ウィンドウ上部タイトルバー (ドラッグ可能) */}
-        <div className="app-drag h-10 bg-[#16181f] border-b border-[#262a36] flex items-center justify-between px-4 select-none relative">
+        <div className="app-drag h-12 bg-[#16181f] border-b border-[#262a36] flex items-center justify-between px-5 select-none relative">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-[#8a8f9c] tracking-wider font-mono flex items-center gap-1.5">
+            <span className="text-[13px] font-semibold text-[#8a8f9c] tracking-wider font-mono flex items-center gap-1.5">
               IEA Client Launcher
-              <span className="text-[9px] bg-lime-500/10 text-lime-400 border border-lime-400/20 px-1.5 py-0.5 rounded-sm font-bold">
+              <span className="text-[11px] bg-lime-500/10 text-lime-400 border border-lime-400/20 px-1.5 py-0.5 rounded-sm font-bold">
                 1.8.9 Dedicated
               </span>
             </span>
           </div>
 
           <div className="app-no-drag flex items-center gap-1.5">
-            <button onClick={() => iea.winMinimize()} className="p-1 rounded text-[#8a8f9c] hover:bg-[#1c1f29] hover:text-[#e7e9ee] transition-all cursor-pointer" title="Minimize">
-              <Minus size={11} />
+            <button onClick={() => iea.winMinimize()} className="p-1.5 rounded text-[#8a8f9c] hover:bg-[#1c1f29] hover:text-[#e7e9ee] transition-all cursor-pointer" title="Minimize">
+              <Minus size={15} />
             </button>
-            <button onClick={() => iea.winMaximize()} className="p-1 rounded text-[#8a8f9c] hover:bg-[#1c1f29] hover:text-[#e7e9ee] transition-all cursor-pointer" title="Maximize">
-              <Square size={9} />
+            <button onClick={() => iea.winMaximize()} className="p-1.5 rounded text-[#8a8f9c] hover:bg-[#1c1f29] hover:text-[#e7e9ee] transition-all cursor-pointer" title="Maximize">
+              <Square size={12} />
             </button>
-            <button onClick={() => iea.winClose()} className="p-1 rounded text-[#8a8f9c] hover:bg-red-500/20 hover:text-red-400 transition-all cursor-pointer" title="Close">
-              <X size={11} />
+            <button onClick={() => iea.winClose()} className="p-1.5 rounded text-[#8a8f9c] hover:bg-red-500/20 hover:text-red-400 transition-all cursor-pointer" title="Close">
+              <X size={15} />
             </button>
           </div>
         </div>
@@ -242,19 +242,19 @@ export default function App() {
         <div className="flex-1 flex overflow-hidden">
 
           {/* 左サイドバー */}
-          <div className="w-[230px] bg-[#16181f] border-r border-[#262a36] flex flex-col justify-between p-4 select-none">
+          <div className="w-[264px] bg-[#16181f] border-r border-[#262a36] flex flex-col justify-between p-5 select-none">
             <div className="space-y-6">
-              <div className="flex items-center gap-3 bg-[#0e0f14] border border-[#262a36] p-2.5 rounded-lg">
-                <div className="w-9 h-9 rounded bg-gradient-to-tr from-lime-400 to-lime-600 flex items-center justify-center text-[#0e0f14] font-bold text-lg shadow-[0_0_15px_rgba(163,230,53,0.3)]">
+              <div className="flex items-center gap-3 bg-[#0e0f14] border border-[#262a36] p-3 rounded-lg">
+                <div className="w-10 h-10 rounded bg-lime-400 flex items-center justify-center text-[#0e0f14] font-bold text-xl">
                   IEA
                 </div>
                 <div>
-                  <h1 className="text-xs font-bold tracking-widest text-[#e7e9ee] font-display">IEA CLIENT</h1>
-                  <p className="text-[9px] font-mono text-lime-400 font-semibold mt-0.5 tracking-wider">Minecraft 1.8.9</p>
+                  <h1 className="text-sm font-bold tracking-widest text-[#e7e9ee] font-display">IEA CLIENT</h1>
+                  <p className="text-[11px] font-mono text-lime-400 font-semibold mt-0.5 tracking-wider">Minecraft 1.8.9</p>
                 </div>
               </div>
 
-              <nav className="space-y-1">
+              <nav className="space-y-1.5">
                 {([
                   ['play', 'GAME PLAY', Gamepad2],
                   ['news', 'CLIENT NEWS', Newspaper],
@@ -263,18 +263,17 @@ export default function App() {
                   ['packs', 'RESOURCES', Package],
                   ['settings', 'SETTINGS', Settings],
                   ['logs', 'CONSOLE', Terminal],
-                ] as const).map(([tab, label, Icon]) => (
+                ] as const).map(([tab, label]) => (
                   <button
                     key={tab}
                     data-tab={tab}
                     onClick={() => setCurrentTab(tab as any)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer border
+                    className={`w-full flex items-center px-3.5 py-2.5 rounded-lg text-[13px] font-bold tracking-wide transition-colors cursor-pointer border
                       ${currentTab === tab
-                        ? 'bg-[#1c1f29] border-[#262a36] text-lime-400 border-l-4 border-l-lime-400 pl-2 shadow-[0_4px_12px_rgba(0,0,0,0.3)]'
+                        ? 'bg-[#1c1f29] border-[#262a36] text-lime-400 border-l-4 border-l-lime-400 pl-2.5'
                         : 'border-transparent text-[#8a8f9c] hover:text-[#e7e9ee] hover:bg-[#1c1f29]/40'
                       }`}
                   >
-                    <Icon size={14} className={currentTab === tab ? 'text-lime-400' : 'text-[#8a8f9c]'} />
                     {t(label)}
                   </button>
                 ))}
@@ -284,23 +283,23 @@ export default function App() {
             {/* 下部: 選択中アカウント & クライアントステータス */}
             <div className="space-y-3 pt-3 border-t border-[#262a36]">
               <div className="flex items-center gap-2.5 bg-[#0e0f14] p-2 rounded-lg border border-[#262a36]">
-                <div className="w-7 h-7 rounded overflow-hidden bg-lime-500/10 flex items-center justify-center text-lime-400 font-bold text-xs select-none border border-lime-400/20 font-mono">
+                <div className="w-7 h-7 rounded overflow-hidden bg-lime-500/10 flex items-center justify-center text-lime-400 font-bold text-sm select-none border border-lime-400/20 font-mono">
                   {faceUrl
                     ? <img src={faceUrl} alt="" className="w-full h-full object-cover" style={{ imageRendering: 'pixelated' }} />
                     : displayAccount.username.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-[10px] font-bold text-[#e7e9ee] font-mono truncate">{displayAccount.username}</h4>
-                  <p className="text-[8px] font-mono text-[#8a8f9c] mt-0.5 flex items-center gap-1">
+                  <h4 className="text-[12px] font-bold text-[#e7e9ee] font-mono truncate">{displayAccount.username}</h4>
+                  <p className="text-[10px] font-mono text-[#8a8f9c] mt-0.5 flex items-center gap-1">
                     <span className={`w-1.5 h-1.5 rounded-full ${displayAccount.type === 'microsoft' ? 'bg-blue-400' : 'bg-gray-500'}`} />
                     {t(displayAccount.type === 'microsoft' ? 'Microsoft Account' : 'Offline Mode')}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] font-mono text-[#8a8f9c] px-1 select-none">
+              <div className="flex items-center justify-between text-[12px] font-mono text-[#8a8f9c] px-1 select-none">
                 <span className="flex items-center gap-1">
-                  <span className={`w-1.5 h-1.5 rounded-full ${isLaunching ? 'bg-amber-400 animate-ping' : 'bg-[#46d28b]'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${isLaunching ? 'bg-amber-400' : 'bg-[#46d28b]'}`} />
                   {t(isLaunching ? 'LAUNCHING' : 'CLIENT READY')}
                 </span>
                 <span>v{appVersion}</span>
@@ -309,7 +308,7 @@ export default function App() {
           </div>
 
           {/* 右メインエリア */}
-          <main className="flex-1 bg-[#0e0f14] p-5 overflow-hidden flex flex-col">
+          <main className="flex-1 bg-[#0e0f14] p-7 overflow-hidden flex flex-col">
             <div className="flex-1 overflow-hidden">
               {currentTab === 'play' && (
                 <TabPlay

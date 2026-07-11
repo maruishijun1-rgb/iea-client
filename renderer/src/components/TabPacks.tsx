@@ -109,20 +109,18 @@ export default function TabPacks({
         onDrop={handleDrop}
         onClick={triggerBrowseFile}
         className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all duration-300 relative overflow-hidden flex flex-col items-center justify-center gap-1.5 select-none h-[110px] flex-shrink-0
-          ${dragOver 
-            ? 'border-lime-400 bg-lime-500/5 shadow-[0_0_15px_rgba(163,230,53,0.15)] scale-[0.99]' 
+          ${dragOver
+            ? 'border-lime-400 bg-lime-500/5'
             : 'border-[#262a36] hover:border-lime-500/50 bg-[#16181f] hover:bg-[#1c1f29]/30'
           }`}
       >
-        <div className="absolute inset-0 bg-radial-gradient from-lime-500/5 to-transparent opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
-        
-        <FolderUp size={20} className={`transition-transform duration-300 ${dragOver ? 'text-lime-400 -translate-y-1 scale-110' : 'text-[#8a8f9c] group-hover:text-lime-400'}`} />
+        <FolderUp size={20} className={`${dragOver ? 'text-lime-400' : 'text-[#8a8f9c] group-hover:text-lime-400'}`} />
         
         <div>
-          <p className="text-xs font-semibold text-[#e7e9ee]">
+          <p className="text-sm font-semibold text-[#e7e9ee]">
             {dragOver ? t('Drop file to Import Resource Pack') : t('Drag & Drop .zip to Import Pack')}
           </p>
-          <p className="text-[10px] text-[#8a8f9c] mt-1">
+          <p className="text-[12px] text-[#8a8f9c] mt-1">
             {t('or click to browse')}
           </p>
         </div>
@@ -134,10 +132,10 @@ export default function TabPacks({
         <div className="bg-[#16181f] border border-[#262a36] rounded-xl p-4 shadow-lg flex flex-col h-full min-h-0">
           <div className="flex justify-between items-center mb-3 border-b border-[#262a36]/50 pb-2.5">
             <div>
-              <h3 className="text-xs font-bold text-[#e7e9ee] uppercase tracking-wider font-display">{t("Available Packs")}</h3>
-              <p className="text-[10px] text-[#8a8f9c] mt-0.5">{t("Not loaded into game")}</p>
+              <h3 className="text-sm font-bold text-[#e7e9ee] uppercase tracking-wider font-display">{t("Available Packs")}</h3>
+              <p className="text-[12px] text-[#8a8f9c] mt-0.5">{t("Not loaded into game")}</p>
             </div>
-            <span className="text-[10px] font-mono bg-[#0e0f14] border border-[#262a36] text-[#8a8f9c] px-2.5 py-0.5 rounded font-bold">
+            <span className="text-[12px] font-mono bg-[#0e0f14] border border-[#262a36] text-[#8a8f9c] px-2.5 py-0.5 rounded font-bold">
               {availablePacks.length} {t("packs")}
             </span>
           </div>
@@ -146,8 +144,8 @@ export default function TabPacks({
             {availablePacks.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-4 border border-dashed border-[#262a36] rounded-lg bg-[#0e0f14]/20">
                 <HelpCircle size={24} className="text-[#8a8f9c]/20 mb-1" />
-                <p className="text-[10px] text-[#8a8f9c]">{t("No packs available.")}</p>
-                <p className="text-[9px] text-[#8a8f9c]/50">{t("Import pack zip file above.")}</p>
+                <p className="text-[12px] text-[#8a8f9c]">{t("No packs available.")}</p>
+                <p className="text-[11px] text-[#8a8f9c]/50">{t("Import pack zip file above.")}</p>
               </div>
             ) : (
               availablePacks.map((pack) => (
@@ -159,17 +157,17 @@ export default function TabPacks({
                   <div className="flex items-center gap-3">
                     {packIcon(pack)}
                     <div className="max-w-[160px] sm:max-w-[180px]">
-                      <h4 className="text-xs font-bold text-[#e7e9ee] group-hover/pack:text-lime-400 transition-colors truncate">
+                      <h4 className="text-sm font-bold text-[#e7e9ee] group-hover/pack:text-lime-400 transition-colors truncate">
                         {cleanName(pack.name)}
                       </h4>
-                      <p className="text-[10px] text-[#8a8f9c] mt-0.5 line-clamp-1">
+                      <p className="text-[12px] text-[#8a8f9c] mt-0.5 line-clamp-1">
                         {pack.description}
                       </p>
                       <div className="flex gap-1.5 mt-1">
-                        <span className="text-[8px] font-mono text-[#8a8f9c] bg-[#0e0f14] border border-[#262a36] px-1.5 py-0.2 rounded-sm font-semibold">
+                        <span className="text-[10px] font-mono text-[#8a8f9c] bg-[#0e0f14] border border-[#262a36] px-1.5 py-0.2 rounded-sm font-semibold">
                           {pack.size}
                         </span>
-                        <span className="text-[8px] font-mono text-[#8a8f9c] bg-[#0e0f14] border border-[#262a36] px-1.5 py-0.2 rounded-sm font-semibold">
+                        <span className="text-[10px] font-mono text-[#8a8f9c] bg-[#0e0f14] border border-[#262a36] px-1.5 py-0.2 rounded-sm font-semibold">
                           {pack.version}
                         </span>
                       </div>
@@ -210,10 +208,10 @@ export default function TabPacks({
         <div className="bg-[#16181f] border border-[#262a36] rounded-xl p-4 shadow-lg flex flex-col h-full min-h-0">
           <div className="flex justify-between items-center mb-3 border-b border-[#262a36]/50 pb-2.5">
             <div>
-              <h3 className="text-xs font-bold text-lime-400 uppercase tracking-wider font-display">{t("Active Packs")}</h3>
-              <p className="text-[10px] text-[#8a8f9c] mt-0.5">{t("Loaded into Minecraft")}</p>
+              <h3 className="text-sm font-bold text-lime-400 uppercase tracking-wider font-display">{t("Active Packs")}</h3>
+              <p className="text-[12px] text-[#8a8f9c] mt-0.5">{t("Loaded into Minecraft")}</p>
             </div>
-            <span className="text-[10px] font-mono bg-lime-500/10 border border-lime-500/20 text-lime-400 px-2.5 py-0.5 rounded font-bold">
+            <span className="text-[12px] font-mono bg-lime-500/10 border border-lime-500/20 text-lime-400 px-2.5 py-0.5 rounded font-bold">
               {selectedPacks.length} {t("active")}
             </span>
           </div>
@@ -221,9 +219,9 @@ export default function TabPacks({
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
             {selectedPacks.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-4 border border-dashed border-[#262a36] rounded-lg bg-[#0e0f14]/20">
-                <ArrowLeftRight size={24} className="text-[#8a8f9c]/15 mb-1 animate-pulse" />
-                <p className="text-[10px] text-[#8a8f9c]">{t("No active packs.")}</p>
-                <p className="text-[9px] text-[#8a8f9c]/50">{t("Click right arrow on available packs.")}</p>
+                <ArrowLeftRight size={24} className="text-[#8a8f9c]/15 mb-1" />
+                <p className="text-[12px] text-[#8a8f9c]">{t("No active packs.")}</p>
+                <p className="text-[11px] text-[#8a8f9c]/50">{t("Click right arrow on available packs.")}</p>
               </div>
             ) : (
               selectedPacks.map((pack) => (
@@ -235,17 +233,17 @@ export default function TabPacks({
                   <div className="flex items-center gap-3">
                     {packIcon(pack)}
                     <div className="max-w-[160px] sm:max-w-[180px]">
-                      <h4 className="text-xs font-bold text-lime-400 truncate">
+                      <h4 className="text-sm font-bold text-lime-400 truncate">
                         {cleanName(pack.name)}
                       </h4>
-                      <p className="text-[10px] text-[#8a8f9c] mt-0.5 line-clamp-1">
+                      <p className="text-[12px] text-[#8a8f9c] mt-0.5 line-clamp-1">
                         {pack.description}
                       </p>
                       <div className="flex gap-1.5 mt-1">
-                        <span className="text-[8px] font-mono text-lime-400 bg-lime-500/5 border border-lime-500/20 px-1.5 py-0.2 rounded-sm font-bold">
+                        <span className="text-[10px] font-mono text-lime-400 bg-lime-500/5 border border-lime-500/20 px-1.5 py-0.2 rounded-sm font-bold">
                           {pack.size}
                         </span>
-                        <span className="text-[8px] font-mono text-[#8a8f9c] bg-[#0e0f14] border border-[#262a36] px-1.5 py-0.2 rounded-sm font-semibold">
+                        <span className="text-[10px] font-mono text-[#8a8f9c] bg-[#0e0f14] border border-[#262a36] px-1.5 py-0.2 rounded-sm font-semibold">
                           {pack.version}
                         </span>
                       </div>

@@ -242,16 +242,16 @@ export default function MinecraftSkin({ username = 'Player_IEA', isLaunching = f
 
       {/* スキンプロファイルラベル */}
       <div className="mt-5 text-center relative z-10 w-full">
-        <p className="text-sm font-semibold tracking-wide text-[#e7e9ee] group-hover:text-lime-400 transition-colors">
+        <p className="text-base font-semibold tracking-wide text-[#e7e9ee] group-hover:text-lime-400 transition-colors">
           {username}
         </p>
-        <p className="text-[10px] font-mono text-[#8a8f9c] tracking-widest mt-0.5 uppercase">
+        <p className="text-[12px] font-mono text-[#8a8f9c] tracking-widest mt-0.5 uppercase">
           IEA Cape Equipped
         </p>
       </div>
 
       {/* クライアント特製バッジ */}
-      <div className="absolute top-3 right-3 bg-lime-500/10 border border-lime-500/20 text-lime-400 text-[9px] font-mono px-2 py-0.5 rounded-full select-none">
+      <div className="absolute top-3 right-3 bg-lime-500/10 border border-lime-500/20 text-lime-400 text-[11px] font-mono px-2 py-0.5 rounded-full select-none">
         PvP SKIN
       </div>
     </div>

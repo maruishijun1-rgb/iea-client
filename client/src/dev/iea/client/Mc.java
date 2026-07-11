@@ -368,63 +368,91 @@ public final class Mc {
         } catch (Throwable t) { return false; }
     }
 
-    // TNT timer: find EntityTNTPrimed via EntityList's (un-obfuscated) "PrimedTnt"
-    // registry string, then read its single int field (fuse).
-    public static Class<?> tntClass;
+    // TNT timer: identify primed TNT by its (de-obfuscated) EntityList name — the SAME
+    // reliable class->name map the hitbox/ItemPhysics features use (entityTypeName) — then
+    // read its single non-static int field (fuse). The old approach scanned every loaded
+    // class for a static "PrimedTnt" map via Instrumentation, which could silently fail
+    // (and then permanently give up after 200 tries), leaving the timer dead.
     private static Field tntFuseField;
-    private static int tntAttempts = 0;
+    private static boolean tntLogged = false;
     public static int tntFuse(Object entity) {
         if (entity == null) return -1;
         try {
-            if (tntClass == null && tntAttempts < 200) { tntAttempts++; findTnt(); }
-            if (tntClass == null || tntFuseField == null) return -1;
-            if (!tntClass.isInstance(entity)) return -1;
-            return tntFuseField.getInt(entity);
+            if (!"PrimedTnt".equals(entityTypeName(entity))) return -1;
+            Class<?> c = entity.getClass();
+            if (tntFuseField == null || tntFuseField.getDeclaringClass() != c) {
+                tntFuseField = null;
+                for (Field f : c.getDeclaredFields()) {
+                    if (!Modifier.isStatic(f.getModifiers()) && f.getType() == int.class) {
+                        f.setAccessible(true); tntFuseField = f; break;
+                    }
+                }
+                if (tntFuseField != null && !tntLogged) {
+                    tntLogged = true;
+                    System.out.println("[IEA] TNT = " + c.getName() + " fuse=" + tntFuseField.getName());
+                }
+            }
+            return (tntFuseField != null) ? tntFuseField.getInt(entity) : -1;
         } catch (Throwable t) { return -1; }
     }
 
-    private static boolean tntFailLogged = false;
-    private static void findTnt() {
-        Instrumentation in = Agent.inst;
-        if (in == null) return;
-        for (Class<?> c : in.getAllLoadedClasses()) {
-            if (c == null || c.getName().indexOf('.') >= 0) continue;
-            for (Field f : c.getDeclaredFields()) {
-                if (!Modifier.isStatic(f.getModifiers())) continue;
-                if (!Map.class.isAssignableFrom(f.getType())) continue;
-                try {
-                    f.setAccessible(true);
-                    Map<?, ?> map = (Map<?, ?>) f.get(null);
-                    if (map == null) continue;
-                    Class<?> found = tntFromMap(map);
-                    if (found != null) { tntClass = found; break; }
-                } catch (Throwable ignored) { }
+    // Reuse Minecraft's OWN floating-name renderer (Render.renderLivingLabel) so any text we
+    // want above an entity (e.g. the TNT timer) looks byte-for-byte like a real nametag: same
+    // font, dark background box, camera billboard and distance fade. Called from onEntityRender
+    // (RenderManager.doRenderEntity entry), where the GL/matrix state is exactly what the
+    // vanilla method expects. renderLivingLabel(entity, str, x, y, z, maxDist) offsets the text
+    // up by (entity height + 0.5) itself, so pass the raw doRenderEntity x/y/z.
+    private static Object labelRender;   // any Render instance (the method draws via renderManager)
+    private static Method labelMethod;   // Render.renderLivingLabel(Entity,String,DDD,int)V
+    private static boolean labelSearched;
+    private static int labelAttempts;
+    public static boolean renderNameLabel(Object entity, String str, double x, double y, double z) {
+        if (entity == null || str == null || renderMgr == null) return false;
+        try {
+            if (labelMethod == null) {
+                if (labelSearched || labelAttempts++ > 400) return false;
+                resolveLabel(entity);
+                if (labelMethod == null) return false;
             }
-            if (tntClass != null) break;
-        }
-        if (tntClass == null) {
-            if (tntAttempts >= 199 && !tntFailLogged) {
-                tntFailLogged = true;
-                System.out.println("[IEA] TNT: 'PrimedTnt' not found in EntityList maps");
-            }
-            return;
-        }
-        for (Field f : tntClass.getDeclaredFields()) {
-            if (!Modifier.isStatic(f.getModifiers()) && f.getType() == int.class) {
-                f.setAccessible(true); tntFuseField = f; break;
-            }
-        }
-        System.out.println("[IEA] TNT = " + tntClass.getName()
-                + " fuse=" + (tntFuseField != null ? tntFuseField.getName() : "?"));
+            labelMethod.invoke(labelRender, entity, str,
+                    Double.valueOf(x), Double.valueOf(y), Double.valueOf(z), Integer.valueOf(64));
+            return true;
+        } catch (Throwable t) { return false; }
     }
 
-    private static Class<?> tntFromMap(Map<?, ?> map) {
-        for (Map.Entry<?, ?> e : map.entrySet()) {
-            Object k = e.getKey(), v = e.getValue();
-            if ("PrimedTnt".equals(k) && v instanceof Class) return (Class<?>) v;
-            if ("PrimedTnt".equals(v) && k instanceof Class) return (Class<?>) k;
-        }
-        return null;
+    private static void resolveLabel(Object entity) {
+        try {
+            // grab any Render instance out of the RenderManager's class->render map(s); prefer
+            // the entity's own render, else the first available (the visual is identical either way)
+            Object render = null;
+            for (Field f : renderMgr.getClass().getDeclaredFields()) {
+                if (!Map.class.isAssignableFrom(f.getType())) continue;
+                f.setAccessible(true);
+                Map<?, ?> m = (Map<?, ?>) f.get(renderMgr);
+                if (m == null || m.isEmpty()) continue;
+                Object own = m.get(entity.getClass());
+                if (own != null) { render = own; break; }
+                for (Object v : m.values()) if (v != null) { render = v; break; }
+                if (render != null) break;
+            }
+            if (render == null) return;
+            // renderLivingLabel is protected on the base Render class — walk the hierarchy.
+            // Signature (Entity, String, double, double, double, int)V is unique on Render.
+            for (Class<?> c = render.getClass(); c != null && labelMethod == null; c = c.getSuperclass()) {
+                for (Method mm : c.getDeclaredMethods()) {
+                    if (mm.getReturnType() != void.class) continue;
+                    Class<?>[] p = mm.getParameterTypes();
+                    if (p.length == 6 && p[1] == String.class && p[2] == double.class
+                            && p[3] == double.class && p[4] == double.class && p[5] == int.class
+                            && p[0].isInstance(entity)) {
+                        mm.setAccessible(true);
+                        labelMethod = mm; labelRender = render; labelSearched = true;
+                        System.out.println("[IEA] nametag label = " + c.getName() + "." + mm.getName());
+                        return;
+                    }
+                }
+            }
+        } catch (Throwable ignored) { }
     }
 
     private static boolean hasMapField(Class<?> c) {
@@ -1390,6 +1418,7 @@ public final class Mc {
             return new int[] { ((Integer) srW.invoke(sr)).intValue(), ((Integer) srH.invoke(sr)).intValue() };
         } catch (Throwable t) { return null; }
     }
+
 
     public static int hotbarSelected() {
         Object p = thePlayer();

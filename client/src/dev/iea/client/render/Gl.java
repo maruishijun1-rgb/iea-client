@@ -1,6 +1,7 @@
 package dev.iea.client.render;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 
 /**
  * Minimal immediate-mode 2D drawing on top of the game frame. begin2D() saves
@@ -23,6 +24,9 @@ public final class Gl {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_CULL_FACE); // ensure our shapes aren't culled by the game's state
+        // our shapes carry their own 1px AA; a driver-multisampled framebuffer would double-AA
+        // them into a soft glow, so disable MSAA for our pass (restored by end2D's popAttrib)
+        GL11.glDisable(GL13.GL_MULTISAMPLE);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
@@ -36,11 +40,13 @@ public final class Gl {
         GL11.glPopAttrib();
     }
 
-    // smoother corners for larger radii
+    // subdivisions per rounded corner (90° arc). Dense enough that the arc is smooth even
+    // after the game's framebuffer is upscaled to the monitor (each render-px covers a few
+    // screen-px), so the polygon facets never show. Capped for big panels.
     private static int segments(float r) {
-        int s = Math.round(r);
-        if (s < 4) s = 4;
-        if (s > 20) s = 20;
+        int s = Math.round(r * 4.0f);
+        if (s < 16) s = 16;
+        if (s > 128) s = 128;
         return s;
     }
 
@@ -89,7 +95,8 @@ public final class Gl {
     }
 
     /** Filled rounded rectangle (matches the launcher's rounded panels). */
-    private static final float AA = 1.0f; // anti-alias edge width in px
+    private static final float AA = 1.4f; // anti-alias edge width in px (wider = smoother corners
+                                          // once the low-res framebuffer is upscaled to the monitor)
 
     private static float[][] cornersOf(float x, float y, float w, float h, float r) {
         return new float[][] {

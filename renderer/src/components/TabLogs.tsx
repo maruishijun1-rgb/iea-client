@@ -66,9 +66,9 @@ export default function TabLogs({
       <div className="bg-[#16181f] border border-[#262a36] rounded-xl p-3 shadow-lg flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           <Scroll size={15} className="text-lime-400" />
-          <h3 className="text-xs font-bold text-[#e7e9ee] uppercase tracking-wider font-display">{t("Client Console")}</h3>
+          <h3 className="text-sm font-bold text-[#e7e9ee] uppercase tracking-wider font-display">{t("Client Console")}</h3>
           {isPaused && (
-            <span className="text-[8px] bg-amber-500/10 border border-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded font-bold animate-pulse">
+            <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded font-bold">
               PAUSED
             </span>
           )}
@@ -78,7 +78,7 @@ export default function TabLogs({
           {/* 自動スクロール */}
           <button
             onClick={onToggleAutoScroll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e0f14] border border-[#262a36] text-[10px] text-[#8a8f9c] hover:text-[#e7e9ee] transition-colors cursor-pointer select-none font-mono"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0e0f14] border border-[#262a36] text-[12px] text-[#8a8f9c] hover:text-[#e7e9ee] transition-colors cursor-pointer select-none font-mono"
             title="Toggle Auto Scroll"
           >
             <span>{t("Auto Scroll")}</span>
@@ -127,13 +127,13 @@ export default function TabLogs({
       <div 
         id="log-console"
         ref={containerRef}
-        className="flex-1 min-h-0 bg-[#0a0b0d] border border-[#262a36] rounded-xl p-4 font-mono text-[10px] leading-relaxed overflow-y-auto overflow-x-hidden scrollbar-thin select-text"
+        className="flex-1 min-h-0 bg-[#0a0b0d] border border-[#262a36] rounded-xl p-4 font-mono text-[12px] leading-relaxed overflow-y-auto overflow-x-hidden scrollbar-thin select-text"
       >
         {logs.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center text-[#8a8f9c]/40 font-sans p-8">
             <Scroll size={32} className="opacity-15 mb-2" />
             <p>{t("Console is empty.")}</p>
-            <p className="text-[10px] opacity-70 mt-1">{t("Start game to stream initialization logs here.")}</p>
+            <p className="text-[12px] opacity-70 mt-1">{t("Start game to stream initialization logs here.")}</p>
           </div>
         ) : (
           <div className="space-y-1">

@@ -45,7 +45,6 @@ public final class Hook {
 
     private static final Deque<Long> leftClicks = new ArrayDeque<Long>();
     private static final Deque<Long> rightClicks = new ArrayDeque<Long>();
-    private static boolean prevLeft = false, prevRight = false;
 
     // 1.8.9 GameSettings field names (universal for the official obfuscated jar)
     private static final String GAMMA = "aJ";
@@ -105,6 +104,19 @@ public final class Hook {
     private static boolean draining = false;
     public static boolean filterEvent(boolean v) {
         if (draining) return v;        // let our own drain loop see real events
+        // Count clicks from the mouse EVENT QUEUE (every press is seen here, since the game
+        // drains all pending events each tick) instead of polling once per frame — polling
+        // caps CPS at the frame rate, so a 255 CPS auto-clicker read as ~FPS (e.g. 77).
+        if (v && !blockGameInput()) {
+            try {
+                if (Mouse.getEventButtonState()) { // a press (not a release / move / wheel)
+                    int btn = Mouse.getEventButton();
+                    long now = System.currentTimeMillis();
+                    if (btn == 0) leftClicks.add(now);
+                    else if (btn == 1) rightClicks.add(now);
+                }
+            } catch (Throwable ignored) { }
+        }
         return blockGameInput() ? false : v;
     }
     // Keyboard.next() specifically: the native call consumes the event from the shared
@@ -919,21 +931,21 @@ public final class Hook {
     public static void drawMainMenu(Object screen, int mx, int my, float partial) {
         try {
             int w = Mc.guiW(screen), h = Mc.guiH(screen);
-            if (w <= 0 || h <= 0) return; // unknown size: skip bg, super still draws buttons
             GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
             try {
                 GL11.glDisable(GL11.GL_DEPTH_TEST);
                 GL11.glDisable(GL11.GL_CULL_FACE);
+                GL11.glDisable(GL13.GL_MULTISAMPLE); // avoid double-AA on the first (MSAA) frames
                 GL11.glEnable(GL11.GL_BLEND);
                 GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                 Gl.alpha = 1f;
-                // launcher backdrop: deep #06070a base + the faint geometric grid, so the
-                // menu matches the launcher window instead of a flat panel / cobblestone
-                Gl.rect(0, 0, w, h, Theme.DEEP);
-                Gl.grid(0, 0, w, h, 24, Theme.GRID);
-                if (logo == null) { logo = new Logo(); logo.init(128); }
-                float size = Math.max(56f, Math.min(h * 0.26f, 100f));
-                logo.draw(w / 2f - size / 2f, h * 0.07f, size);
+                // ALWAYS lay down an opaque full-screen cover first — a GUI-only screen isn't
+                // guaranteed a per-frame colour clear, so if this is skipped the buttons draw
+                // over stale frames and their semi-transparent borders bloom (thick/blurry).
+                // Oversized so it covers regardless of the (possibly still-unknown) scaled size.
+                Gl.rect(-16, -16, 100000, 100000, Theme.DEEP);
+                // launcher backdrop grid on top (only once the scaled size is known)
+                if (w > 0 && h > 0) Gl.grid(0, 0, w, h, 24, Theme.GRID);
             } finally {
                 GL11.glPopAttrib();
             }
@@ -941,7 +953,8 @@ public final class Hook {
             // (drawVanillaLabel), exactly like the restyled buttons. Drawing our own IEA-font
             // quads here would leave the font atlas bound and desync GlStateManager, garbling
             // the button labels that super.drawScreen paints next.
-            drawVanillaLabel("Minecraft 1.8.9   ·   IEA CLIENT", w / 2f, h - 12f, Theme.MUTED);
+            if (w > 0 && h > 0)
+                drawVanillaLabel("Minecraft 1.8.9   ·   IEA CLIENT", w / 2f, h - 12f, Theme.MUTED);
         } catch (Throwable ignored) { }
     }
 
@@ -967,6 +980,13 @@ public final class Hook {
                 GL11.glDisable(GL11.GL_DEPTH_TEST);
                 GL11.glDisable(GL11.GL_CULL_FACE); // world render leaves cull ON -> would cull our fill
                 GL11.glDisable(GL11.GL_TEXTURE_2D);
+                // Our shapes already carry their own 1px AA. On the first title-screen frames
+                // the game renders to a driver-multisampled framebuffer (ms=true), which
+                // double-AAs our outline into a thick blurry "glow"; disable MSAA + polygon/line
+                // smoothing for our draw so the border stays a crisp 1.2px line.
+                GL11.glDisable(GL13.GL_MULTISAMPLE);
+                GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
+                GL11.glDisable(GL11.GL_LINE_SMOOTH);
                 GL11.glEnable(GL11.GL_BLEND);
                 GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                 Gl.alpha = 1f;
@@ -1109,6 +1129,7 @@ public final class Hook {
             // display exists. Minecraft sets these only at startup, so this sticks.
             dev.iea.client.render.WindowChrome.applyOnce();
 
+
             // apply the user's theme accent colour (or revert to the stock lime when off)
             Module themeM = Modules.get("Theme");
             if (themeM != null && themeM.enabled) {
@@ -1149,11 +1170,9 @@ public final class Hook {
             frames++;
             if (now - lastFpsTime >= 1000) { fps = frames; frames = 0; lastFpsTime = now; }
 
+            // clicks are counted in Hook.filterEvent from the mouse event queue (not polled
+            // here), so CPS is not capped by the frame rate
             boolean l = Mouse.isButtonDown(0);
-            boolean r = Mouse.isButtonDown(1);
-            if (l && !prevLeft && !isGuiOpen()) leftClicks.add(now);
-            if (r && !prevRight && !isGuiOpen()) rightClicks.add(now);
-            prevLeft = l; prevRight = r;
             updateOldAnimSwing(l, now); // OldAnimations: per-click swing cycle
             updateSneakSmooth();        // OldAnimations sneak ease + zoom ease
 
@@ -1512,9 +1531,12 @@ public final class Hook {
             if (tnt != null && tnt.enabled) {
                 int fuse = Mc.tntFuse(entity);
                 if (fuse >= 0) {
-                    double[] b = Mc.aabb(Mc.entityBox(entity));
-                    double top = (b != null) ? (b[4] - b[1]) : 1.0;
-                    drawTntTimer(tnt, fuse, x, y + top + 0.4, z);
+                    // Reuse Minecraft's own nametag renderer (Render.renderLivingLabel) so the
+                    // timer is visually identical to a nametag. It adds the entity height + 0.5
+                    // itself, so pass the raw render x/y/z. Colour via a § code: green -> yellow
+                    // -> red as the fuse runs down (20 ticks = 1s, primed at 80).
+                    String c = fuse > 50 ? "§a" : (fuse > 25 ? "§e" : "§c");
+                    Mc.renderNameLabel(entity, c + String.format("%.1f", Math.max(0, fuse) / 20.0f), x, y, z);
                 }
             }
             // LevelHead: all nametags (incl. your own) are drawn by vanilla; filterNameTag adds
@@ -1663,48 +1685,6 @@ public final class Hook {
         int g = (int) m.num(p + "_g", (def >> 8) & 0xFF);
         int b = (int) m.num(p + "_b", def & 0xFF);
         return (r << 16) | (g << 8) | b;
-    }
-
-    // TNT timer: billboarded countdown text above a primed TNT. The billboard is
-    // built by zeroing the modelview rotation, so no camera-angle fields are needed.
-    private static final FloatBuffer MAT = BufferUtils.createFloatBuffer(16);
-    private static boolean tntLogged = false;
-    private static void drawTntTimer(Module m, int fuse, double x, double y, double z) {
-        if (!tntLogged) { tntLogged = true; System.out.println("[IEA] TNT timer drawing, fuse=" + fuse); }
-        String s = String.format("%.1f", Math.max(0, fuse) / 20.0f);
-        float scale = m.num("scale", 1f) * 0.025f;
-
-        GL11.glPushMatrix();
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-        try {
-            GL11.glTranslated(x, y, z);
-            MAT.clear();
-            GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MAT);
-            MAT.put(0, 1f); MAT.put(1, 0f); MAT.put(2, 0f);   // billboard: identity rotation,
-            MAT.put(4, 0f); MAT.put(5, 1f); MAT.put(6, 0f);   // keep the translation column
-            MAT.put(8, 0f); MAT.put(9, 0f); MAT.put(10, 1f);
-            MAT.rewind();
-            GL11.glLoadMatrix(MAT);
-            GL11.glScalef(scale, -scale, scale); // +X (no mirror), -Y (font is y-down -> screen up)
-
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
-            GL11.glDepthMask(false);
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_CULL_FACE);  // billboard quads must not be culled
-            GL11.glDisable(GL11.GL_ALPHA_TEST); // don't discard the semi-transparent text/bg
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-            Gl.alpha = 1f;
-            float w = hudFont.getWidthF(s), h = hudFont.getHeight();
-            Gl.rect(-w / 2f - 3, -h / 2f - 2, w + 6, h + 4, 0x99000000);
-            float t = Math.max(0f, Math.min(1f, fuse / 80f)); // 80 ticks = 4s
-            int col = 0xFF000000 | ((int) (255 * (1 - t)) << 16) | ((int) (255 * t) << 8) | 0x30;
-            hudFont.drawCentered(s, 0, 0, col);
-        } finally {
-            GL11.glPopAttrib();
-            GL11.glPopMatrix();
-        }
     }
 
     private static void drawBoxOutline(double x0, double y0, double z0, double x1, double y1, double z1) {

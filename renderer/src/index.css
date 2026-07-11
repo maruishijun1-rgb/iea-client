@@ -11,9 +11,8 @@
 .app-drag { -webkit-app-region: drag; }
 .app-no-drag { -webkit-app-region: no-drag; }
 
-/* Small fade-in used across tabs. */
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-.animate-fadeIn { animation: fadeIn 0.25s ease-out; }
+/* Tabs switch instantly — decorative motion is kept to a minimum. */
+.animate-fadeIn { animation: none; }
 
 html, body, #root { height: 100%; margin: 0; }
 body { overflow: hidden; }

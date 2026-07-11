@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, screen } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -41,9 +41,11 @@ function agentJarPath() {
 }
 
 function createWindow() {
+  // Default to ~80% of the screen's work area (regardless of monitor size), centered.
+  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
   mainWindow = new BrowserWindow({
-    width: 980,
-    height: 640,
+    width: Math.max(900, Math.round(sw * 0.8)),
+    height: Math.max(600, Math.round(sh * 0.8)),
     minWidth: 900,
     minHeight: 600,
     resizable: true,
@@ -60,6 +62,7 @@ function createWindow() {
       nodeIntegration: false,
     },
   });
+  mainWindow.center();
   // Built React renderer (Vite -> renderer-dist), loaded via file://.
   mainWindow.loadFile(path.join(__dirname, '..', '..', 'renderer-dist', 'index.html'));
 }

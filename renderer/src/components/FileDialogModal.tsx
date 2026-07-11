@@ -88,7 +88,7 @@ export default function FileDialogModal({
         <div className="flex justify-between items-center bg-[#1c1f29] border-b border-[#262a36] px-4 py-3 select-none">
           <div className="flex items-center gap-2">
             <Folder size={14} className="text-lime-400" />
-            <span className="text-xs font-bold text-[#e7e9ee] uppercase tracking-wider">
+            <span className="text-sm font-bold text-[#e7e9ee] uppercase tracking-wider">
               {type === 'java' ? 'Select Java Executable' : 'Select Game Directory'}
             </span>
           </div>
@@ -101,7 +101,7 @@ export default function FileDialogModal({
         </div>
 
         {/* パス表示バー */}
-        <div className="bg-[#0e0f14]/50 border-b border-[#262a36] px-4 py-2 flex items-center gap-1 text-[10px] font-mono text-[#8a8f9c] select-text overflow-x-auto whitespace-nowrap scrollbar-none">
+        <div className="bg-[#0e0f14]/50 border-b border-[#262a36] px-4 py-2 flex items-center gap-1 text-[12px] font-mono text-[#8a8f9c] select-text overflow-x-auto whitespace-nowrap scrollbar-none">
           <span>Local Disk (C:)</span>
           <ChevronRight size={10} />
           <span>{currentPath}</span>
@@ -121,7 +121,7 @@ export default function FileDialogModal({
                     : 'hover:bg-[#1c1f29] border border-transparent text-[#8a8f9c] hover:text-[#e7e9ee]'
                   }`}
               >
-                <div className="flex items-center gap-2 text-xs font-mono">
+                <div className="flex items-center gap-2 text-sm font-mono">
                   {file.isFolder ? (
                     <Folder size={14} className="text-lime-400" />
                   ) : (
@@ -142,19 +142,19 @@ export default function FileDialogModal({
 
         {/* フッター */}
         <div className="bg-[#1c1f29] border-t border-[#262a36] px-4 py-3 flex justify-between items-center">
-          <div className="text-[10px] text-[#8a8f9c] font-mono truncate max-w-[55%]">
+          <div className="text-[12px] text-[#8a8f9c] font-mono truncate max-w-[55%]">
             Selected: {selectedItem ? selectedItem.name : (type === 'folder' ? '.minecraft (folder)' : 'javaw.exe')}
           </div>
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-3.5 py-1.5 rounded-lg bg-transparent border border-[#262a36] text-xs font-semibold text-[#8a8f9c] hover:text-[#e7e9ee] cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-transparent border border-[#262a36] text-sm font-semibold text-[#8a8f9c] hover:text-[#e7e9ee] cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-1.5 rounded-lg bg-lime-500 text-[#0e0f14] text-xs font-bold hover:bg-lime-400 cursor-pointer flex items-center gap-1 shadow-lg shadow-lime-500/10"
+              className="px-4 py-1.5 rounded-lg bg-lime-500 text-[#0e0f14] text-sm font-bold hover:bg-lime-400 cursor-pointer flex items-center gap-1 shadow-lg shadow-lime-500/10"
             >
               <Check size={12} />
               Confirm

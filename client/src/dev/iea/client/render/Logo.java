@@ -3,7 +3,6 @@ package dev.iea.client.render;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
@@ -28,12 +27,12 @@ public final class Logo {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         float r = px * 0.22f; // matches the launcher icon's corner radius
-        g.setPaint(new GradientPaint(0, 0, new Color(0xA3, 0xE6, 0x35),
-                px, px, new Color(0x65, 0xA3, 0x0D)));
+        // solid lime badge with bold black "IEA" — same mark as the launcher/app icon
+        g.setColor(new Color(0xA3, 0xE6, 0x35));
         g.fill(new RoundRectangle2D.Float(0, 0, px, px, r * 2, r * 2));
 
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Segoe UI", Font.BOLD, (int) (px * 0.34f)));
+        g.setColor(new Color(0x0E, 0x0F, 0x14));
+        g.setFont(new Font("Segoe UI", Font.BOLD, (int) (px * 0.42f)));
         FontMetrics fm = g.getFontMetrics();
         String s = "IEA";
         float tx = (px - fm.stringWidth(s)) / 2f;

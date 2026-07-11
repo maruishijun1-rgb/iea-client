@@ -108,9 +108,9 @@ public final class Modules {
         add("HitParticles", "Render", false).desc("d.hitparticles")
                 .add(new Setting("count", "s.count", 12f, 1f, 500f, 1f))
                 .add(new Setting("type", "s.type", new String[] { "s.hp_magic", "s.hp_crit" }, 0));
-        // TNT fuse countdown above primed TNT (RenderManager.doRenderEntity hook)
-        add("TNTTimer", "Render", false).desc("d.tnttimer")
-                .add(new Setting("scale", "s.scale", 1f, 0.5f, 3f, 0.1f));
+        // TNT fuse countdown above primed TNT — drawn with Minecraft's own nametag renderer
+        // (Render.renderLivingLabel), so it looks exactly like a nametag (fixed size).
+        add("TNTTimer", "Render", false).desc("d.tnttimer");
         // LevelHead (Hypixel): other players' network level above their head. Needs a
         // Hypixel API key in iea-hypixel-key.txt placed in the game folder.
         add("LevelHead", "Render", false).desc("d.levelhead")

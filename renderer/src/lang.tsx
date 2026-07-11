@@ -22,6 +22,8 @@ const JA: Record<string, string> = {
   'LAUNCHING': '起動中',
   'Microsoft Account': 'Microsoft アカウント',
   'Offline Mode': 'オフライン',
+  'Premium': 'プレミアム',
+  'Offline': 'オフライン',
   'Not logged in': '未ログイン',
 
   // play

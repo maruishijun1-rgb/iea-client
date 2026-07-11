@@ -16,7 +16,7 @@ function dashUuid(id) {
   return `${id.slice(0, 8)}-${id.slice(8, 12)}-${id.slice(12, 16)}-${id.slice(16, 20)}-${id.slice(20)}`;
 }
 
-function toAccount(mc) {
+function toAccount(mc, refreshToken) {
   const profile = mc.profile || {};
   return {
     type: 'microsoft',
@@ -24,7 +24,10 @@ function toAccount(mc) {
     uuid: dashUuid(profile.id),
     accessToken: mc.mcToken,
     userType: 'msa',
-    refreshToken: mc.refreshTkn || null,
+    // msmc v5: the refresh token comes from xbox.save() (mc.refreshTkn is only set on the
+    // Auth-refresh path, not after an interactive Xbox login) — without it we can't silently
+    // re-auth, so the ~24h access token would expire and the game boots you at a server.
+    refreshToken: refreshToken || mc.refreshTkn || null,
   };
 }
 
@@ -40,7 +43,9 @@ async function microsoftLogin(_onPrompt) {
   if (!mc.profile) {
     throw new Error('This Microsoft account does not own Minecraft (Java Edition).');
   }
-  return toAccount(mc);
+  let refresh = null;
+  try { refresh = xbox.save(); } catch (_) { /* no refresh token available */ }
+  return toAccount(mc, refresh);
 }
 
 /**
@@ -54,7 +59,11 @@ async function microsoftRefresh(refreshToken) {
     const xbox = await authManager.refresh(refreshToken);
     const mc = await xbox.getMinecraft();
     if (!mc.profile) return null;
-    return toAccount(mc);
+    // capture the (possibly rotated) refresh token so the NEXT launch can refresh too;
+    // fall back to the token we were given if save() yields nothing.
+    let refresh = null;
+    try { refresh = xbox.save(); } catch (_) { /* ignore */ }
+    return toAccount(mc, refresh || refreshToken);
   } catch (_) {
     return null;
   }
